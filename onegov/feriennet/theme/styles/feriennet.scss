@@ -2038,3 +2038,54 @@ ul.tags {
         }
     }
 }
+
+/*
+    Attendee Details in Bookings View
+*/
+.attendees-toggle {
+    align-items: center;
+    border-top: 1px dashed $gainsboro;
+    display: flex;
+    justify-content: center;
+    margin-bottom: -.875rem;
+    margin-top: 1rem;
+    padding-left: grid-calc(1, $total-columns);
+
+    > div {
+        background: $white;
+        border: 1px dashed #aaa;
+        border-radius: 50px;
+        font-size: .875rem;
+        padding: 0 12px;
+        position: relative;
+        top: -.8rem;
+    }
+
+    :hover,
+    &.toggled {
+        color: $anchor-font-color;
+        cursor: pointer;
+    }
+
+    span:first-child::before {
+        @include icon('\f13a');
+        margin-right: .75ex;
+    }
+
+    &.toggled span:first-child::before {
+        content: '\f139';
+    }
+}
+
+.attendees-table {
+    margin-left: grid-calc(1, $total-columns);
+    width: calc(100% - 3.5rem);
+
+    thead {
+        background-color: transparent;
+    }
+
+    th {
+        padding: 5px 5px 5px 0;
+    }
+}

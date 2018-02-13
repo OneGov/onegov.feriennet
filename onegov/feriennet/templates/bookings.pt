@@ -138,10 +138,24 @@
                                                         <li tal:repeat="action actions" tal:content="structure action(request)" />
                                                     </ul>
                                                 </div>
+                                            </div>
+                                        </div>
+                                        <div class="row collapse">
+                                            <div class="columns small-12">
                                                 <div class="attendees" tal:define="count related[booking.occasion_id][0].attendee_count">
-                                                    <div class="attendees-toggle">
-                                                        <hr>
-                                                        <span>${count} <tal:b i18n:translate>Attendees</tal:b></span>
+                                                    <table class="attendees-table" id="attendees-table-${booking.id}" style="display: none;">
+                                                        <thead>
+                                                            <tr>
+                                                                <th i18n:translate>Parent</th>
+                                                                <th i18n:translate>Children</th>
+                                                                <th i18n:translate>Phone</th>
+                                                                <th i18n:translate>E-Mail</th>
+                                                                <th i18n:translate>Place</th>
+                                                            </tr>
+                                                        </thead>
+                                                    </table>
+                                                    <div class="attendees-toggle" data-toggle="#attendees-table-${booking.id}">
+                                                        <div><span>${count}</span> <span i18n:translate>Attendees</span></div>
                                                     </div>
                                                 </div>
                                             </div>
