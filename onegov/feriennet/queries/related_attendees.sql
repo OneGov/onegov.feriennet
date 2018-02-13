@@ -2,14 +2,14 @@
     Attendees related to a set of occasions
 */
 SELECT
-    occasion_id,                    -- UUID
-    attendee_count,             -- Integer
-    parent,                         -- Text
-    parent_username,                -- Text
-    ARRAY_AGG(child) AS children,   -- ARRAY(Text)
-    phone,                          -- Text
-    place,                          -- Text
-    email                           -- Text
+    occasion_id,                  -- UUID
+    attendee_count,               -- Integer
+    parent,                       -- Text
+    parent_username,              -- Text
+    COUNT(child) AS children,     -- Integer
+    phone,                        -- Text
+    place,                        -- Text
+    email                         -- Text
 FROM (
     SELECT
         users.username AS parent_username,
