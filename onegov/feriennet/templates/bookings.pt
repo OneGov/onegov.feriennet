@@ -138,6 +138,12 @@
                                                         <li tal:repeat="action actions" tal:content="structure action(request)" />
                                                     </ul>
                                                 </div>
+                                                <div class="attendees" tal:define="count related[booking.occasion_id][0].attendee_count">
+                                                    <div class="attendees-toggle">
+                                                        <hr>
+                                                        <span>${count} <tal:b i18n:translate>Attendees</tal:b></span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </li>
