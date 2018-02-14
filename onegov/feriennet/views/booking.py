@@ -176,8 +176,12 @@ def view_my_bookings(self, request):
     periods = request.app.periods
     period = next((p for p in periods if p.id == self.period_id), None)
 
-    occasions = {b.occasion_id for b in bookings}
-    related = related_attendees(self.session, occasions)
+    if period.confirmed and request.app.org.meta.get('show_related_contacts'):
+        related = related_attendees(self.session, occasion_ids={
+            b.occasion_id for b in bookings
+        })
+    else:
+        related = None
 
     if request.is_admin:
         users = all_users(request)

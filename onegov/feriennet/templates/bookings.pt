@@ -140,7 +140,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="row collapse">
+                                        <div class="row collapse" tal:condition="related">
                                             <div class="columns small-12">
                                                 <div class="attendees" tal:define="count related[booking.occasion_id][0].attendee_count">
                                                     <div class="attendees-table" id="attendees-table-${booking.id}" style="display: none;">

@@ -29,4 +29,4 @@ FROM (
         LEFT JOIN users ON bookings.username = users.username
 ) AS attendee_list
 GROUP BY occasion_id, attendee_count, parent, parent_username, phone, place, email
-ORDER BY occasion_id, parent
+ORDER BY occasion_id, lower(unaccent(parent))
