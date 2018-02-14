@@ -1,5 +1,9 @@
+from itsdangerous import BadSignature
+from itsdangerous import SignatureExpired
+from itsdangerous import URLSafeTimedSerializer
 from onegov.core.utils import Bunch
 from onegov.feriennet.models.notification_template import TemplateVariables
+from onegov.feriennet.models.calendar import TokenProtected
 from uuid import uuid4
 
 
@@ -46,3 +50,48 @@ def test_template_variables():
         == 'Go to <a href="VacationActivityCollection">ACTIVITIES</a>'
     assert t.render("Go to [HOMEPAGE]") \
         == 'Go to <a href="MockRequest">HOMEPAGE</a>'
+
+
+def test_token_protected_calendar():
+
+    class MockRequest(object):
+
+        @property
+        def app(self):
+            return Bunch(session=lambda: 'session')
+
+        @property
+        def serializer(self):
+            return URLSafeTimedSerializer('foobar')
+
+        def new_url_safe_token(self, data, salt=None, max_age=None):
+            return self.serializer.dumps(data, salt=salt)
+
+        def load_url_safe_token(self, data, salt=None, max_age=None):
+            try:
+                return self.serializer.loads(data, salt=salt)
+            except (SignatureExpired, BadSignature):
+                return None
+
+    class FooCalendar(TokenProtected):
+
+        def __init__(self, session, foo):
+            self.session = session
+            self.foo = foo
+
+        @classmethod
+        def from_keywords(cls, session, foo):
+            if foo:
+                return cls(session, foo)
+
+    request = MockRequest()
+
+    foo = FooCalendar(None, 'bar')
+    token = foo.to_token(request)
+
+    foo = FooCalendar.from_token(request, token)
+
+    assert foo.session == 'session'
+    assert foo.foo == 'bar'
+
+    assert not FooCalendar.from_token(request, token + 'xyz')
