@@ -2077,29 +2077,27 @@ ul.tags {
     }
 }
 
-.attendees-list {
+.attendees-table {
     $column-width: grid-calc(1, $total-columns);
 
     font-size: .8rem;
     margin-left: $column-width;
     margin-right: $column-gutter;
+    padding: .75rem 0 1rem;
     width: calc(100% - #{$column-width} - #{$column-gutter});
 
-    > div + div {
-        margin-top: .5rem;
-    }
+    table {
+        margin: 0;
+        width: 100%;
 
-    a,
-    i {
-        font-size: .8rem;
-    }
+        tbody {
+            td:first-child {
+                width: 40%;
+            }
 
-    strong {
-        font-weight: 500;
-    }
-
-    ul li {
-        margin-bottom: 0 !important;
-        margin-left: 1.4ex;
+            td:last-child .fa {
+                margin-right: 1ex;
+            }
+        }
     }
 }

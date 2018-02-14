@@ -143,24 +143,48 @@
                                         <div class="row collapse">
                                             <div class="columns small-12">
                                                 <div class="attendees" tal:define="count related[booking.occasion_id][0].attendee_count">
-                                                    <div class="attendees-list dense" id="attendees-list-${booking.id}" style="display: none;">
-                                                        <div tal:repeat="r related[booking.occasion_id]">
-                                                            <strong>
-                                                                • ${r.parent}<tal:b condition="r.place">, ${r.place.strip()}</tal:b>, ${r.children} <tal:b i18n:translate condition="r.children > 1">Children</tal:b><tal:b i18n:translate condition="r.children == 1">Child</tal:b>
-                                                            </strong>
-                                                            <ul>
-                                                                <li>
-                                                                    <i class="fa fa-envelope-o" aria-hidden="true"></i>
-                                                                    <a href="mailto:${r.email}">${r.email}</a>
-                                                                </li>
-                                                                <li tal:condition="r.phone">
-                                                                    <i class="fa fa-phone" aria-hidden="true"></i>
-                                                                    <a href="tel:${r.phone}">${r.phone}</a>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
+                                                    <div class="attendees-table" id="attendees-table-${booking.id}" style="display: none;">
+                                                        <table>
+                                                            <thead>
+                                                                <tr>
+                                                                    <th i18n:translate>Parent</th>
+                                                                    <th i18n:translate>Children</th>
+                                                                    <th i18n:translate>Place</th>
+                                                                    <th i18n:translate>Contact</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr tal:repeat="row related[booking.occasion_id]">
+                                                                    <td>${row.parent}</td>
+                                                                    <td>
+                                                                        <span class="show-for-sr">
+                                                                            ${row.children} <tal:b i18n:translate>Children</tal:b>
+                                                                        </span>
+                                                                        <tal:b repeat="n tuple(range(0, row.children))">
+                                                                            <i class="fa fa-child" aria-hidden="true"></i>
+                                                                        </tal:b>
+                                                                    </td>
+                                                                    <td>${row.place}</td>
+                                                                    <td>
+                                                                        <a href="mailto:${row.email}" tal:condition="row.email" title="${row.email}">
+                                                                            <span class="show-for-sr" i18n:translate>
+                                                                                E-Mail <tal:b i18n:name="name">${row.parent}</tal:b>
+                                                                            </span>
+                                                                            <i class="fa fa-envelope" aria-hidden="true"></i>
+                                                                        </a>
+
+                                                                        <a href="tel:${row.phone}" tal:condition="row.phone" title="${row.phone}">
+                                                                            <span class="show-for-sr" i18n:translate>
+                                                                                Call <tal:b i18n:name="name">${row.parent}</tal:b>
+                                                                            </span>
+                                                                            <i class="fa fa-phone" aria-hidden="true"></i>
+                                                                        </a>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
                                                     </div>
-                                                    <div class="attendees-toggle" data-toggle="#attendees-list-${booking.id}">
+                                                    <div class="attendees-toggle" data-toggle="#attendees-table-${booking.id}">
                                                         <div><span>${count}</span> <span i18n:translate>Attendees</span></div>
                                                     </div>
                                                 </div>
