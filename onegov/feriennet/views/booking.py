@@ -191,7 +191,11 @@ def view_my_bookings(self, request):
         users, user = None, request.current_user
 
     def subscribe_link(attendee):
-        return AttendeeCalendar(self.session, attendee).link(request)
+        url = AttendeeCalendar(self.session, attendee).link(request)
+        url = url.replace('https://', 'webcal://')
+        url = url.replace('http://', 'webcal://')
+
+        return url
 
     def get_total(attendee):
         return total_by_bookings(period, bookings_by_attendee.get(attendee))
