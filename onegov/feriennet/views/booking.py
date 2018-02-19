@@ -191,7 +191,7 @@ def view_my_bookings(self, request):
         users, user = None, request.current_user
 
     def subscribe_link(attendee):
-        url = AttendeeCalendar(self.session, attendee).link(request)
+        url = request.link(AttendeeCalendar(self.session, attendee))
         url = url.replace('https://', 'webcal://')
         url = url.replace('http://', 'webcal://')
 
