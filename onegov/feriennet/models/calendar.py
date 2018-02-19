@@ -3,8 +3,8 @@ import icalendar
 from onegov.activity import Attendee
 from onegov.core.orm import as_selectable_from_path
 from onegov.core.utils import module_path
-from onegov.feriennet import _
-from sedate import standardize_date
+from onegov.feriennet.models import VacationActivity
+from sedate import standardize_date, utcnow
 from sqlalchemy import and_, select
 
 
@@ -32,6 +32,7 @@ class Calendar(object):
         calendar = icalendar.Calendar()
         calendar.add('prodid', '-//OneGov//onegov.feriennet//')
         calendar.add('version', '2.0')
+        calendar.add('method', 'PUBLISH')
 
         return calendar
 
@@ -64,6 +65,7 @@ class AttendeeCalendar(Calendar, name='attendee'):
 
     def calendar(self, request):
         calendar = self.new()
+        calendar.add('x-wr-calname', self.attendee.name)
 
         for event in self.events(request):
             calendar.add_component(event)
@@ -80,17 +82,39 @@ class AttendeeCalendar(Calendar, name='attendee'):
             stmt.c.confirmed == True
         )))
 
-        def title(record):
-            if record.cancelled:
-                return f"${request.translate(_('Cancelled'))}: {record.title}"
-
-            return record.title
+        datestamp = utcnow()
 
         for record in records:
             event = icalendar.Event()
 
-            event.add('summary', title(record))
+            event.add('uid', record.booking_id.hex)
+            event.add('summary', record.title)
+
+            if record.note:
+                event.add('description', record.note)
+
             event.add('dtstart', standardize_date(record.start, 'UTC'))
             event.add('dtend', standardize_date(record.end, 'UTC'))
+            event.add('dtstamp', datestamp)
+            event.add('url', request.class_link(
+                VacationActivity, {'name': record.name}))
+
+            if record.meeting_point:
+                event.add('location', record.meeting_point)
+
+            if record.lat and record.lon:
+                event.add('geo', (float(record.lat), float(record.lon)))
+
+            if record.meeting_point and record.lat and record.lon:
+                event.add(
+                    "X-APPLE-STRUCTURED-LOCATION",
+                    f"geo:{record.lat},{record.lon}",
+                    parameters={
+                        "VALUE": "URI",
+                        "X-ADDRESS": record.meeting_point,
+                        "X-APPLE-RADIUS": "50",
+                        "X-TITLE": record.meeting_point
+                    }
+                )
 
             yield event
