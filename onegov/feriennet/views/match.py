@@ -1,9 +1,15 @@
-from onegov.core.cache import lru_cache
 from onegov.activity import Attendee
 from onegov.activity import Booking, BookingCollection, Occasion
+from onegov.activity import PeriodCollection
 from onegov.activity.matching import deferred_acceptance_from_database
+from onegov.activity.matching.score import PreferAdminChildren
+from onegov.activity.matching.score import PreferOrganiserChildren
+from onegov.activity.matching.score import Scoring
+from onegov.core.cache import lru_cache
 from onegov.core.security import Secret
 from onegov.core.utils import normalize_for_url
+from onegov.core.errors import TooManyWorkersError
+from onegov.core.errors import TooManyInstancesError
 from onegov.feriennet import _, FeriennetApp
 from onegov.feriennet.collections import MatchCollection
 from onegov.feriennet.forms import MatchForm
@@ -18,36 +24,80 @@ from sqlalchemy import and_
 from sqlalchemy.orm import joinedload
 
 
+@FeriennetApp.worker(name='matching')
+def run_matching(request, period_id, confirm, prefer_organiser, prefer_admins):
+    period = PeriodCollection(request.session).by_id(period_id)
+
+    if period.confirmed:
+        request.alert(_("The period was already confirmed"))
+        return
+
+    scoring = Scoring()
+
+    if prefer_organiser:
+        scoring.criteria.append(
+            PreferOrganiserChildren.from_session(request.session))
+
+    if prefer_admins:
+        scoring.criteria.append(
+            PreferAdminChildren.from_session(request.session))
+
+    deferred_acceptance_from_database(
+        session=request.session,
+        period_id=period_id,
+        score_function=scoring)
+
+    if confirm:
+        period.confirm()
+        PeriodMessage.create(period, request, 'confirmed')
+        request.success(_("The matching was confirmed successfully"))
+    else:
+        request.success(_("The matching run executed successfully"))
+
+
 @FeriennetApp.form(
     model=MatchCollection,
     form=MatchForm,
     template='matches.pt',
     permission=Secret)
-def handle_matches(self, request, form):
+def handle_matching(self, request, form):
 
     layout = MatchCollectionLayout(self, request)
 
-    if form.submitted(request):
+    if 'matching' in request.app.workers:
+        worker = request.app.workers['matching']
+    else:
+        worker = None
+
+    working = worker and worker.working
+
+    if not working and form.submitted(request):
         assert self.period.active and not self.period.confirmed
 
-        deferred_acceptance_from_database(
-            session=request.session,
-            period_id=self.period_id,
-            score_function=form.scoring(request.session))
-
-        self.period.scoring = form.scoring(request.session)
-
-        if form.confirm_period:
-            self.period.confirm()
-            PeriodMessage.create(self.period, request, 'confirmed')
-            request.success(_("The matching was confirmed successfully"))
-        else:
-            request.success(_("The matching run executed successfully"))
-
-        self.session.flush()
+        try:
+            request.app.workers.spawn(
+                name='matching',
+                period_id=self.period.id,
+                prefer_organisers=form.prefer_organiser.data,
+                prefer_admins=form.prefer_admins.data,
+                confirm_period=form.confirm_period
+            )
+        except TooManyInstancesError:
+            request.error(_("Matching is already in progress"))
+        except TooManyWorkersError:
+            request.error(_(
+                "Too many users are using matching at the same time, "
+                "please wait a few minutes and try again."
+            ))
 
     elif not request.POST:
         form.process_scoring(self.period.scoring)
+
+    elif working:
+        request.warn(
+            _("Matching started ${time} ago and is still in progress"),
+            mapping={'time': layout.format_date(worker.start, 'relative')}
+        )
 
     def activity_link(oid):
         return request.class_link(Occasion, {'id': oid})
@@ -86,7 +136,8 @@ def handle_matches(self, request, form):
         'form': form,
         'button_text': _("Run Matching"),
         'model': self,
-        'filters': filters
+        'filters': filters,
+        'working': working
     }
 
 
