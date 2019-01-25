@@ -1915,8 +1915,8 @@ msgstr "Votre offre a été publiée"
 msgid "Your activity has been archived"
 msgstr "Votre offre a été archivée"
 
-msgid "A ticket has been opened"
-msgstr "Un ticket a été ouvert"
+msgid "Your ticket has been opened"
+msgstr "Votre ticket a été ouvert"
 
 msgid "Clone"
 msgstr "Copier"

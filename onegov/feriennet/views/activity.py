@@ -531,7 +531,7 @@ def propose_activity(self, request):
     send_ticket_mail(
         request=request,
         template='mail_ticket_opened.pt',
-        subject=_("A ticket has been opened"),
+        subject=_("Your ticket has been opened"),
         receivers=(self.username, ),
         ticket=ticket,
         force=(
@@ -614,11 +614,9 @@ def administer_activity(model, request, action, template, subject):
     send_ticket_mail(
         request=request,
         template=template,
-        subject=(': '.join((
-            request.translate(subject),
-            ticket.reference(request)
-        ))),
+        subject=subject,
         receivers=(model.username, ),
+        ticket=ticket,
         content={
             'model': model,
             'ticket': ticket

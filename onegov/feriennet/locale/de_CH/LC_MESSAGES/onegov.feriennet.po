@@ -1895,8 +1895,8 @@ msgstr "Ihr Angebot wurde veröffentlicht"
 msgid "Your activity has been archived"
 msgstr "Ihr Angebot wurde archiviert"
 
-msgid "A ticket has been opened"
-msgstr "Ein Ticket wurde eröffnet"
+msgid "Your ticket has been opened"
+msgstr "Ihr Ticket wurde eröffnet"
 
 msgid "Clone"
 msgstr "Duplizieren"
