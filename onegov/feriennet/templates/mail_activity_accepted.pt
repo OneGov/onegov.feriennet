@@ -9,7 +9,7 @@
         <p>${model.lead}</p>
 
         <p>
-            <a href="${request.link(model, 'status')}" i18n:translate>Check ticket status</a>
+            <a href="${request.link(ticket, 'status')}" i18n:translate>Check ticket status</a>
         </p>
     </tal:b>
 </div>
