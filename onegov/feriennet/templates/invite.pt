@@ -28,7 +28,7 @@
         <div class="group-membership">
             <div>
                 <h3 i18n:translate>Members</h3>
-                <ul>
+                <ul class="members-in-group">
                     <li tal:repeat="(attendee, booking) model.attendees">
                         <div class="group-attendee">${attendee.name} ${attendee.gender == 'male' and '👦' or '👧'}</div>
                         <div tal:condition="may_execute_action(booking)" class="group-action" tal:content="structure group_action(booking, 'leave')(layout)"></div>
@@ -39,7 +39,7 @@
                 <tal:b condition="request.is_logged_in">
                     <h3 i18n:translate>Not in Group</h3>
                     <tal:b define="prospects tuple(model.prospects(request.current_username))">
-                        <ul tal:condition="prospects">
+                        <ul class="members-outside-group" tal:condition="prospects">
                             <li tal:repeat="(attendee, booking) prospects">
                                 <div class="group-attendee">${attendee.name} ${attendee.gender == 'male' and '👦' or '👧'}</div>
                                 <div class="group-action" tal:condition="booking and booking.state in ('open', 'accepted') and may_execute_action(booking)" tal:content="structure group_action(booking, 'join')(layout)"></div>
