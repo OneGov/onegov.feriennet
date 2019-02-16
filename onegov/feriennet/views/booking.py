@@ -17,10 +17,11 @@ from onegov.feriennet import FeriennetApp, _
 from onegov.feriennet.layout import BookingCollectionLayout, GroupInviteLayout
 from onegov.feriennet.models import AttendeeCalendar, GroupInvite
 from onegov.feriennet.views.shared import users_for_select_element
+from onegov.user import User
+from purl import URL
+from sortedcontainers import SortedList
 from sqlalchemy import select, and_
 from sqlalchemy.orm import contains_eager
-from sortedcontainers import SortedList
-from onegov.user import User
 from uuid import UUID
 
 
@@ -166,22 +167,34 @@ def actions_by_booking(layout, period, booking):
                 )
             else:
                 # XXX this is not too efficient as there might be many queries
-                count = booking.group_code_count()
+                count = booking.group_code_count() - 1
 
                 invite = GroupInvite(
                     layout.request.session, booking.group_code)
 
-                if count <= 1:
+                if count < 1:
                     actions.append(
                         Link(
                             text=_("Invite a companion"),
                             url=layout.request.link(invite),
                             attrs={
                                 'class': 'invite-link',
+                                'data-group': booking.group_code,
                             },
                         )
                     )
-                else:
+                elif count == 1:
+                    actions.append(
+                        Link(
+                            text=_("With 1 companion in a group"),
+                            url=layout.request.link(invite),
+                            attrs={
+                                'class': 'invite-link',
+                                'data-group': booking.group_code,
+                            },
+                        )
+                    )
+                elif count > 1:
                     actions.append(
                         Link(
                             text=_("With ${n} companions in a group", mapping={
@@ -190,6 +203,7 @@ def actions_by_booking(layout, period, booking):
                             url=layout.request.link(invite),
                             attrs={
                                 'class': 'invite-link',
+                                'data-group': booking.group_code,
                             },
                         )
                     )
@@ -489,6 +503,40 @@ def create_invite(self, request):
 def view_group_invite(self, request):
     layout = GroupInviteLayout(self, request)
     occasion = self.occasion
+    attendees_count = len(self.attendees)
+
+    def group_action(booking, action):
+        assert action in ('join', 'leave')
+
+        if attendees_count == 1 and action == 'leave':
+            traits = (
+                # Confirm(
+                #     _("This is the last member of the group."),
+                #     _("By leaving the group, the group will cease to exist."),
+                #     _("Leave Group")
+                # ),
+                Intercooler(
+                    request_method='POST',
+                    redirect_after=request.class_link(BookingCollection)
+                ),
+            )
+        else:
+            traits = (
+                Intercooler(
+                    request_method='POST',
+                    redirect_after=request.link(self)
+                ),
+            )
+
+        url = URL(request.link(self, action))\
+            .query_param('booking_id', booking.id)\
+            .as_string()
+
+        return Link(
+            text=(action == 'join' and _("Join Group") or _("Leave Group")),
+            url=layout.csrf_protected_url(url),
+            traits=traits
+        )
 
     return {
         'layout': layout,
@@ -496,5 +544,44 @@ def view_group_invite(self, request):
             'title': occasion.activity.title
         }),
         'occasion': occasion,
-        'model': self
+        'model': self,
+        'group_action': group_action,
     }
+
+
+@FeriennetApp.view(
+    model=GroupInvite,
+    permission=Personal,
+    name='join',
+    request_method='POST')
+def join_group(self, request):
+    request.assert_valid_csrf_token()
+
+    booking_id = request.params.get('booking_id', None)
+    booking = request.session.query(Booking).filter_by(id=booking_id).first()
+
+    if not booking:
+        request.warning(_("The booking does not exist"))
+        return
+
+    booking.group_code = self.group_code
+    request.success(_("Successfully joined the group"))
+
+
+@FeriennetApp.view(
+    model=GroupInvite,
+    permission=Personal,
+    name='leave',
+    request_method='POST')
+def leave_group(self, request):
+    request.assert_valid_csrf_token()
+
+    booking_id = request.params.get('booking_id', None)
+    booking = request.session.query(Booking).filter_by(id=booking_id).first()
+
+    if not booking:
+        request.warning(_("The booking does not exist"))
+        return
+
+    booking.group_code = None
+    request.success(_("Successfully left the group"))

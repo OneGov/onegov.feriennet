@@ -55,7 +55,9 @@ class GroupInvite(object):
     def attendees(self):
         """ Returns the attendees linked to this invite. """
 
-        return tuple(booking.attendee for booking in self.bookings())
+        return tuple(
+            (booking.attendee, booking) for booking in self.bookings()
+        )
 
     def prospects(self, username):
         """ Returns the attendees associated with the given users that are
@@ -70,7 +72,7 @@ class GroupInvite(object):
         if not username:
             return
 
-        existing = {a.id for a in self.attendees}
+        existing = {a.id for a, b in self.attendees}
 
         attendees = self.session.query(Attendee)\
             .filter(Attendee.username == username)\

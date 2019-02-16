@@ -1,5 +1,6 @@
 from cached_property import cached_property
 from onegov.activity import Activity, PeriodCollection, Occasion
+from onegov.activity import BookingCollection
 from onegov.feriennet import _
 from onegov.feriennet import security
 from onegov.feriennet.collections import BillingCollection
@@ -155,10 +156,23 @@ class GroupInviteLayout(DefaultLayout):
 
     @cached_property
     def breadcrumbs(self):
-        return [
-            Link(_("Homepage"), self.homepage_url),
-            Link(_("Invite"), '#')
-        ]
+        wishlist_phase = self.app.active_period \
+            and self.app.active_period.wishlist_phase
+
+        if self.request.is_logged_in:
+            return [
+                Link(_("Homepage"), self.homepage_url),
+                Link(
+                    wishlist_phase and _("Wishlist") or _("Bookings"),
+                    self.request.class_link(BookingCollection)
+                ),
+                Link(_("Invite"), '#')
+            ]
+        else:
+            return [
+                Link(_("Homepage"), self.homepage_url),
+                Link(_("Invite"), '#')
+            ]
 
 
 class VacationActivityFormLayout(DefaultLayout):

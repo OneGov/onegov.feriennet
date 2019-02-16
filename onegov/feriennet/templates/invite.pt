@@ -23,8 +23,8 @@
 
         <h3 i18n:translate>Current Members</h3>
         <ul>
-            <li tal:repeat="attendee model.attendees">
-                ${attendee.name} • <b><a href="#">Leave group</a></b>
+            <li tal:repeat="(attendee, booking) model.attendees">
+                ${attendee.name} • <b tal:content="structure group_action(booking, 'leave')(layout)"></b>
             </li>
         </ul>
 
@@ -33,7 +33,7 @@
             <ul tal:condition="prospects">
                 <li tal:repeat="(attendee, booking) prospects">
                     ${attendee.name} •
-                        <b><a tal:condition="booking">Join group</a></b>
+                        <b><b tal:content="structure group_action(booking, 'join')(layout)"></b></b>
                         <b><a tal:condition="not:booking">Sign up</a></b>
                 </li>
             </ul>
