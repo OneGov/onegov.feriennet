@@ -750,7 +750,7 @@ ul.tags {
 
 .occasion {
     margin-bottom: 2rem;
-    min-height: 3rem;
+    padding-bottom: .5rem;
     position: relative;
 
     .note p {
@@ -825,6 +825,10 @@ $booking-left-margin: 2rem;
             right: 32px;
             top: 24px;
 
+            a {
+                cursor: pointer;
+            }
+
             a::before {
                 background-color: $light-background;
                 border-radius: 50px;
@@ -834,6 +838,7 @@ $booking-left-margin: 2rem;
                 margin: 0;
                 text-align: center;
                 width: 24px;
+                padding-left: 2px;
             }
         }
 
@@ -1077,19 +1082,39 @@ $booking-left-margin: 2rem;
 
     .actions {
         ul {
+            left: -2.5ex;
             margin: 0;
+            position: relative;
 
             li {
+                display: block;
                 font-size: .875rem;
-                margin: 0;
+                margin: 0 0 .25rem;
 
-                &::after {
-                    color: $body-font-color;
-                    content: ' | ';
+                a {
+                    display: block;
+
+                    &::before {
+                        display: block;
+                        margin-right: .25ex;
+                        width: 2ex !important;
+                    }
                 }
 
-                &:first-child::after {
-                    content: '';
+                .invite-link {
+                    font-weight: bold;
+                }
+
+                .cancel-link::before {
+                    @include icon('\f256');
+                }
+
+                .delete-link::before {
+                    @include icon('\f014');
+                }
+
+                .invite-link::before {
+                    @include icon('\f004');
                 }
             }
         }
@@ -2315,5 +2340,25 @@ $booking-left-margin: 2rem;
 
     .toggled .toggle-off {
         display: inline-block;
+    }
+}
+
+/*
+    Group invites
+*/
+.occasion-panel {
+    max-width: $max-line-width;
+    border: 4px solid $gray;
+    border-radius: 2px;
+    padding: .5rem 1rem;
+    margin-bottom: 1rem;
+
+    .call-to-action {
+        margin-bottom: 0;
+    }
+
+    .occasion {
+        margin-bottom: 0;
+        margin-top: .75rem;
     }
 }

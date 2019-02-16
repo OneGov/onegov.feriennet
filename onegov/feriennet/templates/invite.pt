@@ -1,0 +1,67 @@
+<div metal:use-macro="layout.base" i18n:domain="onegov.feriennet">
+    <tal:b metal:fill-slot="title">
+        ${title}
+    </tal:b>
+    <tal:b metal:fill-slot="content">
+
+        <p i18n:translate class="page-lead">
+            Children can join their companions in a group to go to activities
+            together.
+        </p>
+
+        <div class="occasion-panel">
+            <h3>
+                <a href="${request.link(model.occasion.activity)}">
+                    ${model.occasion.activity.title}
+                </a>
+            </h3>
+
+            <div class="occasions">
+                <metal:b use-macro="layout.macros['occasion']" tal:define="show_enroll True"/>
+            </div>
+        </div>
+
+        <h3 i18n:translate>Current Members</h3>
+        <ul>
+            <li tal:repeat="attendee model.attendees">
+                ${attendee.name} • <b><a href="#">Leave group</a></b>
+            </li>
+        </ul>
+
+        <h3 i18n:translate>Not in Group</h3>
+        <tal:b define="prospects tuple(model.prospects(request.current_username))">
+            <ul tal:condition="prospects">
+                <li tal:repeat="(attendee, booking) prospects">
+                    ${attendee.name} •
+                        <b><a tal:condition="booking">Join group</a></b>
+                        <b><a tal:condition="not:booking">Sign up</a></b>
+                </li>
+            </ul>
+            <p tal:condition="not:prospects" i18n:translate>
+                All your children are already part of this group.
+            </p>
+        </tal:b>
+
+        <h3 i18n:translate>Information</h3>
+
+        <p i18n:translate class="limit-line-width">
+            We will try our best to keep groups together, but there are no guarantees.
+            It is possible that only parts of the group are accepted for an activity,
+            but it should be fairly rare.
+        </p>
+
+        <p i18n:translate class="limit-line-width">
+            You can join your own children to this group or you can share this
+            link with other parents so they can join their children:
+        </p>
+
+        <p>
+            <a href="${request.link(model)}"><b>${request.link(model)}</b></a>
+        </p>
+
+        <p i18n:translate class="limit-line-width">
+            Children need to have a booking before they can join the group.
+        </p>
+
+    </tal:b>
+</div>

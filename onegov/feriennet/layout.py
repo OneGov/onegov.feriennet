@@ -151,6 +151,16 @@ class BookingCollectionLayout(DefaultLayout):
         ]
 
 
+class GroupInviteLayout(DefaultLayout):
+
+    @cached_property
+    def breadcrumbs(self):
+        return [
+            Link(_("Homepage"), self.homepage_url),
+            Link(_("Invite"), '#')
+        ]
+
+
 class VacationActivityFormLayout(DefaultLayout):
 
     def __init__(self, model, request, title):

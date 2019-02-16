@@ -8,15 +8,15 @@ from onegov.activity import Booking
 from onegov.activity import BookingCollection
 from onegov.activity import Occasion
 from onegov.core.custom import json
+from onegov.core.elements import Link, Confirm, Intercooler
 from onegov.core.orm import as_selectable_from_path
-from onegov.core.security import Personal, Secret
+from onegov.core.security import Public, Personal, Secret
 from onegov.core.templates import render_macro
 from onegov.core.utils import normalize_for_url, module_path
 from onegov.feriennet import FeriennetApp, _
-from onegov.feriennet.layout import BookingCollectionLayout
-from onegov.feriennet.models import AttendeeCalendar
+from onegov.feriennet.layout import BookingCollectionLayout, GroupInviteLayout
+from onegov.feriennet.models import AttendeeCalendar, GroupInvite
 from onegov.feriennet.views.shared import users_for_select_element
-from onegov.org.elements import ConfirmLink, DeleteLink
 from sqlalchemy import select, and_
 from sqlalchemy.orm import contains_eager
 from sortedcontainers import SortedList
@@ -152,17 +152,69 @@ def actions_by_booking(layout, period, booking):
     if not period:
         return actions
 
+    if booking.state == 'accepted':
+        if period.wishlist_phase or period.booking_phase:
+            if not booking.group_code:
+                actions.append(
+                    Link(
+                        text=_("Invite a companion"),
+                        url=layout.request.link(booking, 'invite'),
+                        attrs={
+                            'class': 'invite-link',
+                        },
+                    )
+                )
+            else:
+                # XXX this is not too efficient as there might be many queries
+                count = booking.group_code_count()
+
+                invite = GroupInvite(
+                    layout.request.session, booking.group_code)
+
+                if count <= 1:
+                    actions.append(
+                        Link(
+                            text=_("Invite a companion"),
+                            url=layout.request.link(invite),
+                            attrs={
+                                'class': 'invite-link',
+                            },
+                        )
+                    )
+                else:
+                    actions.append(
+                        Link(
+                            text=_("With ${n} companions in a group", mapping={
+                                'n': count
+                            }),
+                            url=layout.request.link(invite),
+                            attrs={
+                                'class': 'invite-link',
+                            },
+                        )
+                    )
+
     if period.wishlist_phase or booking.state in DELETABLE_STATES:
-        actions.append(DeleteLink(
+        actions.append(Link(
             text=_("Remove"),
             url=layout.csrf_protected_url(layout.request.link(booking)),
-            confirm=_('Do you really want to remove "${title}"?', mapping={
-                'title': get_booking_title(layout, booking)
-            }),
-            yes_button_text=_("Remove Booking"),
-            redirect_after=layout.request.link(layout.model),
-            classes=('confirm', ),
-            target='#booking-{}'.format(booking.id)
+            attrs={
+                'class': 'delete-link',
+            },
+            traits=(
+                Confirm(
+                    _('Do you really want to remove "${title}"?', mapping={
+                        'title': get_booking_title(layout, booking)
+                    }),
+                    None,
+                    _("Remove Booking"),
+                ),
+                Intercooler(
+                    request_method='DELETE',
+                    redirect_after=layout.request.link(layout.model),
+                    target='#booking-{}'.format(booking.id),
+                ),
+            )
         ))
 
     if period.booking_phase and booking.state == 'accepted':
@@ -174,19 +226,26 @@ def actions_by_booking(layout, period, booking):
             may_cancel = False
 
         if may_cancel:
-            actions.append(ConfirmLink(
+            actions.append(Link(
                 text=_("Cancel Booking"),
                 url=layout.csrf_protected_url(
                     layout.request.link(booking, 'cancel')
                 ),
-                confirm=_('Do you really want to cancel "${title}"?', mapping={
-                    'title': get_booking_title(layout, booking)
-                }),
-                extra_information=_("This cannot be undone."),
-                yes_button_text=_("Cancel Booking"),
-                redirect_after=layout.request.link(layout.model),
-                classes=('confirm', )
-            ))
+                attrs={
+                    'class': 'cancel-link',
+                },
+                traits=(
+                    Confirm(
+                        _('Do you really want to cancel "${title}"?', mapping={
+                            'title': get_booking_title(layout, booking)
+                        }),
+                        _("This cannot be undone.")
+                    ),
+                    Intercooler(
+                        request_method='POST',
+                        redirect_after=layout.request.link(layout.model)
+                    )
+                )))
 
     return actions
 
@@ -404,3 +463,38 @@ def view_mask(self, request):
             display: block;
         }
     """ % attendee
+
+
+@FeriennetApp.view(
+    model=Booking,
+    name='invite',
+    permission=Personal)
+def create_invite(self, request):
+    """ Creates a group_code on the booking, if one doesn't exist already
+    and redirects to the GroupInvite view.
+
+    """
+
+    if not self.group_code:
+        self.group_code = GroupInvite.create(request.session).group_code
+
+    link = request.link(GroupInvite(request.session, self.group_code))
+    return request.redirect(link)
+
+
+@FeriennetApp.html(
+    model=GroupInvite,
+    permission=Public,
+    template='invite.pt')
+def view_group_invite(self, request):
+    layout = GroupInviteLayout(self, request)
+    occasion = self.occasion
+
+    return {
+        'layout': layout,
+        'title': _('Group for "${title}"', mapping={
+            'title': occasion.activity.title
+        }),
+        'occasion': occasion,
+        'model': self
+    }
