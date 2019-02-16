@@ -60,6 +60,8 @@ class GroupInvite(object):
 
         return tuple(
             (booking.attendee, booking) for booking in self.bookings()
+            .outerjoin(Attendee)
+            .order_by(func.unaccent(Attendee.name))
         )
 
     def prospects(self, username):

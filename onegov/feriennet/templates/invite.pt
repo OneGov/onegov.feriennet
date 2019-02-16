@@ -4,10 +4,14 @@
     </tal:b>
     <tal:b metal:fill-slot="content">
 
-        <p i18n:translate class="page-lead">
-            Children can join their companions in a group to go to activities
+        <p i18n:translate class="page-lead" i18n:translate>
+            Attendees can join their companions in a group to go to activities
             together.
         </p>
+
+        <div class="panel callout" tal:condition="not:model.occasion.period.active" i18n:translate>
+            This group is from an inactive period.
+        </div>
 
         <div class="occasion-panel">
             <h3>
@@ -21,31 +25,37 @@
             </div>
         </div>
 
-        <h3 i18n:translate>Current Members</h3>
-        <ul>
-            <li tal:repeat="(attendee, booking) model.attendees">
-                ${attendee.name} • <b tal:content="structure group_action(booking, 'leave')(layout)"></b>
-            </li>
-        </ul>
-
-        <tal:b condition="request.is_logged_in">
-            <h3 i18n:translate>Not in Group</h3>
-            <tal:b define="prospects tuple(model.prospects(request.current_username))">
-                <ul tal:condition="prospects">
-                    <li tal:repeat="(attendee, booking) prospects">
-                        ${attendee.name} •
-                            <b tal:condition="booking and booking.state in ('open', 'accepted')" tal:content="structure group_action(booking, 'join')(layout)"></b>
-                            <b i18n:translate tal:condition="booking and booking.state == 'blocked'">Blocked</b>
-                            <b i18n:translate tal:condition="booking and booking.state == 'cancelled'">Cancelled</b>
-                            <b i18n:translate tal:condition="booking and booking.state == 'denied'">Denied</b>
-                            <b i18n:translate tal:condition="not:booking">Not signed up</b>
+        <div class="group-membership">
+            <div>
+                <h3 i18n:translate>Members</h3>
+                <ul>
+                    <li tal:repeat="(attendee, booking) model.attendees">
+                        <div class="group-attendee">${attendee.name} ${attendee.gender == 'male' and '👦' or '👧'}</div>
+                        <div tal:condition="may_execute_action(booking)" class="group-action" tal:content="structure group_action(booking, 'leave')(layout)"></div>
                     </li>
                 </ul>
-                <p tal:condition="not:prospects" i18n:translate>
-                    All your children are already part of this group.
-                </p>
-            </tal:b>
-        </tal:b>
+            </div>
+            <div>
+                <tal:b condition="request.is_logged_in">
+                    <h3 i18n:translate>Not in Group</h3>
+                    <tal:b define="prospects tuple(model.prospects(request.current_username))">
+                        <ul tal:condition="prospects">
+                            <li tal:repeat="(attendee, booking) prospects">
+                                <div class="group-attendee">${attendee.name} ${attendee.gender == 'male' and '👦' or '👧'}</div>
+                                <div class="group-action" tal:condition="booking and booking.state in ('open', 'accepted') and may_execute_action(booking)" tal:content="structure group_action(booking, 'join')(layout)"></div>
+                                <div class="group-disabled-action" i18n:translate tal:condition="booking and booking.state == 'blocked'">Booking Blocked</div>
+                                <div class="group-disabled-action" i18n:translate tal:condition="booking and booking.state == 'cancelled'">Booking Cancelled</div>
+                                <div class="group-disabled-action" i18n:translate tal:condition="booking and booking.state == 'denied'">Booking Denied</div>
+                                <div class="group-disabled-action" i18n:translate tal:condition="not:booking">Not signed up</div>
+                            </li>
+                        </ul>
+                        <p tal:condition="not:prospects" i18n:translate>
+                            All your children are already part of this group.
+                        </p>
+                    </tal:b>
+                </tal:b>
+            </div>
+        </div>
 
         <h3 i18n:translate>Information</h3>
 

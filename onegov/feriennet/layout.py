@@ -166,12 +166,12 @@ class GroupInviteLayout(DefaultLayout):
                     wishlist_phase and _("Wishlist") or _("Bookings"),
                     self.request.class_link(BookingCollection)
                 ),
-                Link(_("Invite"), '#')
+                Link(_("Group"), '#')
             ]
         else:
             return [
                 Link(_("Homepage"), self.homepage_url),
-                Link(_("Invite"), '#')
+                Link(_("Group"), '#')
             ]
 
 

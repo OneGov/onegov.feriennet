@@ -4,6 +4,7 @@ from collections import defaultdict, OrderedDict
 from datetime import date
 from decimal import Decimal
 from onegov.activity import Activity, AttendeeCollection
+from onegov.activity import Attendee
 from onegov.activity import Booking
 from onegov.activity import BookingCollection
 from onegov.activity import Occasion
@@ -153,7 +154,7 @@ def actions_by_booking(layout, period, booking):
     if not period:
         return actions
 
-    if booking.state == 'accepted':
+    if booking.state in ('accepted', 'open'):
         if period.wishlist_phase or period.booking_phase:
             if not booking.group_code:
                 actions.append(
@@ -506,16 +507,19 @@ def view_group_invite(self, request):
     occasion = self.occasion
     attendees_count = len(self.attendees)
 
+    own_children = set(
+        a.id for a in request.session.query(Attendee.id)
+        .filter_by(username=request.current_username)
+    )
+
+    def may_execute_action(booking):
+        return booking.attendee_id in own_children
+
     def group_action(booking, action):
         assert action in ('join', 'leave')
 
         if attendees_count == 1 and action == 'leave':
             traits = (
-                # Confirm(
-                #     _("This is the last member of the group."),
-                #     _("By leaving the group, the group will cease to exist."),
-                #     _("Leave Group")
-                # ),
                 Intercooler(
                     request_method='POST',
                     redirect_after=request.class_link(BookingCollection)
@@ -547,7 +551,8 @@ def view_group_invite(self, request):
         'occasion': occasion,
         'model': self,
         'group_action': group_action,
-        'wrap_occasion_link': request.return_here
+        'wrap_occasion_link': request.return_here,
+        'may_execute_action': may_execute_action,
     }
 
 
@@ -564,6 +569,15 @@ def join_group(self, request):
 
     if not booking:
         request.warning(_("The booking does not exist"))
+        return
+
+    own_children = set(
+        a.id for a in request.session.query(Attendee.id)
+        .filter_by(username=request.current_username)
+    )
+    if booking.attendee_id not in own_children:
+        request.alert(
+            _("Not permitted to join this attendee to the group"))
         return
 
     booking.group_code = self.group_code
@@ -583,6 +597,16 @@ def leave_group(self, request):
 
     if not booking:
         request.warning(_("The booking does not exist"))
+        return
+
+    own_children = set(
+        a.id for a in request.session.query(Attendee.id)
+        .filter_by(username=request.current_username)
+    )
+
+    if booking.attendee_id not in own_children:
+        request.alert(
+            _("Not permitted to evict this attendee from the group"))
         return
 
     booking.group_code = None
