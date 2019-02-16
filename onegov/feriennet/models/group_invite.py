@@ -35,7 +35,10 @@ class GroupInvite(object):
         return self.session.query(Booking)\
             .options(joinedload(Booking.attendee))\
             .options(joinedload(Booking.occasion))\
-            .filter_by(group_code=self.group_code)
+            .filter_by(group_code=self.group_code)\
+            .filter(Booking.state.in_((
+                'open', 'accepted'
+            )))
 
     @cached_property
     def occasion(self):

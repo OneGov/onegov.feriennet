@@ -28,18 +28,23 @@
             </li>
         </ul>
 
-        <h3 i18n:translate>Not in Group</h3>
-        <tal:b define="prospects tuple(model.prospects(request.current_username))">
-            <ul tal:condition="prospects">
-                <li tal:repeat="(attendee, booking) prospects">
-                    ${attendee.name} •
-                        <b><b tal:content="structure group_action(booking, 'join')(layout)"></b></b>
-                        <b><a tal:condition="not:booking">Sign up</a></b>
-                </li>
-            </ul>
-            <p tal:condition="not:prospects" i18n:translate>
-                All your children are already part of this group.
-            </p>
+        <tal:b condition="request.is_logged_in">
+            <h3 i18n:translate>Not in Group</h3>
+            <tal:b define="prospects tuple(model.prospects(request.current_username))">
+                <ul tal:condition="prospects">
+                    <li tal:repeat="(attendee, booking) prospects">
+                        ${attendee.name} •
+                            <b tal:condition="booking and booking.state in ('open', 'accepted')" tal:content="structure group_action(booking, 'join')(layout)"></b>
+                            <b i18n:translate tal:condition="booking and booking.state == 'blocked'">Blocked</b>
+                            <b i18n:translate tal:condition="booking and booking.state == 'cancelled'">Cancelled</b>
+                            <b i18n:translate tal:condition="booking and booking.state == 'denied'">Denied</b>
+                            <b i18n:translate tal:condition="not:booking">Not signed up</b>
+                    </li>
+                </ul>
+                <p tal:condition="not:prospects" i18n:translate>
+                    All your children are already part of this group.
+                </p>
+            </tal:b>
         </tal:b>
 
         <h3 i18n:translate>Information</h3>

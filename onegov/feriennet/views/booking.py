@@ -173,13 +173,14 @@ def actions_by_booking(layout, period, booking):
                     layout.request.session, booking.group_code)
 
                 if count < 1:
+
+                    # the group code is not shown if the attendee is alone
                     actions.append(
                         Link(
                             text=_("Invite a companion"),
                             url=layout.request.link(invite),
                             attrs={
                                 'class': 'invite-link',
-                                'data-group': booking.group_code,
                             },
                         )
                     )
@@ -546,6 +547,7 @@ def view_group_invite(self, request):
         'occasion': occasion,
         'model': self,
         'group_action': group_action,
+        'wrap_occasion_link': request.return_here
     }
 
 
