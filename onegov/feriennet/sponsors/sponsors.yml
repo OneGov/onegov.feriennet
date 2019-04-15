@@ -103,18 +103,18 @@
   banners:
     bookings:
       src:
-        de: sponsors/concordia-banner-de.jpg
-        fr: sponsors/concordia-banner-fr.jpg
-        it: sponsors/concordia-banner-it.jpg
+        de: sponsors/lidl-banner-de.png
+        fr: sponsors/lidl-banner-fr.png
+        it: sponsors/lidl-banner-it.png
       url:
         de: 'https://family.lidl.ch/?utm_source=ferienet&utm_medium=online&utm_campaign=pro_juventude&utm_content=family_generic'
         fr: 'https://family.lidl.ch/fr/startseite-fr/?utm_source=ferienet&utm_medium=online&utm_campaign=pro_juventude&utm_content=family_generic'
         it: 'https://family.lidl.ch/fr/startseite-fr/?utm_source=ferienet&utm_medium=online&utm_campaign=pro_juventude&utm_content=family_generic'
     invoices:
       src:
-        de: sponsors/concordia-banner-de.jpg
-        fr: sponsors/concordia-banner-fr.jpg
-        it: sponsors/concordia-banner-it.jpg
+        de: sponsors/lidl-banner-de.png
+        fr: sponsors/lidl-banner-fr.png
+        it: sponsors/lidl-banner-it.png
       url:
         de: 'https://family.lidl.ch/?utm_source=ferienet&utm_medium=online&utm_campaign=pro_juventude&utm_content=family_generic'
         fr: 'https://family.lidl.ch/fr/startseite-fr/?utm_source=ferienet&utm_medium=online&utm_campaign=pro_juventude&utm_content=family_generic'
