@@ -3,13 +3,15 @@ from onegov.core.security import Personal, Secret
 from onegov.core.templates import render_macro
 from onegov.feriennet import FeriennetApp, _
 from onegov.feriennet.collections import BillingCollection
+from onegov.feriennet.forms import DonationForm
 from onegov.feriennet.layout import InvoiceLayout
+from onegov.feriennet.layout import DonationLayout
 from onegov.feriennet.views.shared import users_for_select_element
 from onegov.pay import process_payment
 from onegov.user import User
-from stdnum import iban
 from sqlalchemy import nullsfirst
 from sqlalchemy.orm import contains_eager
+from stdnum import iban
 
 
 @FeriennetApp.view(
@@ -166,3 +168,23 @@ def handle_payment(self, request):
         request.success(_("Your payment has been received. Thank you!"))
 
     return request.redirect(request.link(self))
+
+
+@FeriennetApp.form(
+    model=InvoiceCollection,
+    form=DonationForm,
+    template='donation.pt',
+    permission=Personal,
+    name='donate')
+def handle_donation(self, request, form):
+    if request.current_user.id == self.user_id:
+        title = _("Donation")
+    else:
+        user = request.session.query(User).filter_by(id=self.user_id).first()
+        title = _("Donation of ${user}", mapping={'user': user.title})
+
+    return {
+        'title': title,
+        'layout': DonationLayout(self, request, title),
+        'form': form,
+    }

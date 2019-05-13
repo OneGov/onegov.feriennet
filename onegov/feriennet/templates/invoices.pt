@@ -72,6 +72,21 @@
                                     <span class="item-amount" tal:content="'{:.2f}'.format(item.amount)"></span>
                                 </li>
                             </tal:b>
+                            <tal:b condition="layout.org.meta.get('donation', True) and invoice.period.active and invoice.period.confirmed and not invoice.period.archived">
+                                <li class="item-group">
+                                    <strong i18n:translate>Donation</strong>
+                                </li>
+                                <li class="row">
+                                    <div class="small-8 columns">
+                                        <span class="item-text" i18n:translate>Support our work with a donation.</span>
+                                    </div>
+                                    <div class="small-4 columns">
+                                        <a class="donation-button" href="${request.link(layout.model, name='donate')}" i18n:translate>
+                                            I donate
+                                        </a>
+                                    </div>
+                                </li>
+                            </tal:b>
                             <li class="item-total ${invoice.paid and 'paid' or 'unpaid'}">
                                 <strong i18n:translate="">Total</strong>
                                 <strong class="item-amount" tal:content="'{:.2f}'.format(invoice.total_amount)"></strong>

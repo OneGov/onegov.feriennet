@@ -82,16 +82,16 @@ class FeriennetSettingsForm(Form):
         fieldset=_("TOS")
     )
 
-    donate = BooleanField(
+    donation = BooleanField(
         label=_("Donations"),
         description=_("Show a donation button in the billing view"),
         default=True,
         fieldset=_("Donation"))
 
-    donate_amounts = TextAreaField(
+    donation_amounts = TextAreaField(
         label=_("Donation Amounts"),
         description=_("One amount per line"),
-        depends_on=('donate', 'true'),
+        depends_on=('donation', 'true'),
         render_kw={'rows': 3},
         fieldset=_("Donation"))
 
@@ -125,14 +125,14 @@ class FeriennetSettingsForm(Form):
             ('bank_esr_participant_number', ''),
             ('bank_esr_identification_number', ''),
             ('tos_url', ''),
-            ('donate', True),
-            ('donate_amounts', DEFAULT_DONATION_AMOUNTS)
+            ('donation', True),
+            ('donation_amounts', DEFAULT_DONATION_AMOUNTS)
         )
 
         for attr, default in attributes:
             value = obj.meta.get(attr, default)
 
-            if attr == 'donate_amounts':
+            if attr == 'donation_amounts':
                 value = format_donation_amounts(value)
 
             getattr(self, attr).data = value
@@ -150,14 +150,14 @@ class FeriennetSettingsForm(Form):
             'bank_esr_participant_number',
             'bank_esr_identification_number',
             'tos_url',
-            'donate',
-            'donate_amounts',
+            'donation',
+            'donation_amounts',
         )
 
         for attr in attributes:
             value = getattr(self, attr).data
 
-            if attr == 'donate_amounts':
+            if attr == 'donation_amounts':
                 value = parse_donation_amounts(value)
 
             obj.meta[attr] = value
