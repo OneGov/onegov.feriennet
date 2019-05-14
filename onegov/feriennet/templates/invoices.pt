@@ -81,8 +81,8 @@
                                         <span class="item-text" i18n:translate>Support our work with a donation.</span>
                                     </div>
                                     <div class="small-4 columns">
-                                        <a class="donation-button" href="${request.link(layout.model, name='donate')}" i18n:translate>
-                                            I donate
+                                        <a class="donation-button" href="${request.link(layout.model, name='donate')}">
+                                            <span i18n:translate>I donate</span>
                                         </a>
                                     </div>
                                 </li>

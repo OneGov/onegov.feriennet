@@ -2721,4 +2721,13 @@ $booking-left-margin: 2rem;
     &:hover {
         color: $green-dark;
     }
+
+    span::after {
+        @include icon('\f08a');
+        margin-left: .75ex;
+    }
+
+    &:hover span::after {
+        content: '\f004';
+    }
 }
