@@ -65,8 +65,9 @@
                             <tal:b repeat="item invoice.items">
                                 <li class="item-group" tal:condition="repeat.item.index == 0 or invoice.items[repeat.item.index - 1].group != item.group">
                                     <tal:b switch="item.group">
-                                        <strong tal:case="'donation'" i18n:translate>
-                                            Donation <span class="svg-icon svg-icon-small">
+                                        <strong tal:case="'donation'">
+                                            <tal:b i18n:translate>Donation</tal:b>
+                                            <span class="svg-icon svg-icon-small">
                                                 <metal:b use-macro="layout.svg['heart']" />
                                             </span>
                                         </strong>
@@ -99,7 +100,8 @@
                                             data-confirm-no="Cancel"
                                             ic-delete-from="${layout.csrf_protected_url(request.link(layout.model.for_period_id(invoice.period_id), name='donation'))}"
                                             redirect-after="${request.url}"
-                                            i18n:attributes="data-confirm-yes;data-confirm-no">
+                                            i18n:attributes="data-confirm;data-confirm-yes;data-confirm-no"
+                                            i18n:translate>
                                             Remove
                                         </a>
                                     </div>

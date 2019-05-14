@@ -84,7 +84,7 @@ class FeriennetSettingsForm(Form):
 
     donation = BooleanField(
         label=_("Donations"),
-        description=_("Show a donation button in the billing view"),
+        description=_("Show a donation button in the invoice view"),
         default=True,
         fieldset=_("Donation"))
 

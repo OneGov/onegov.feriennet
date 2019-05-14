@@ -22,3 +22,16 @@ class DonationForm(Form):
         parsable = (f'{a:.2f}' for a in amounts)
 
         self.amount.choices = tuple(zip(parsable, readable))
+
+    def ensure_valid_donation(self):
+        # let's prevent shenanigans, like negative donations
+
+        try:
+            amount = float(self.amount.data)
+        except ValueError:
+            self.amount.errors = [_("Invalid amount")]
+            return False
+
+        if not (0 < amount < float('inf')):
+            self.amount.errors = [_("Invalid amount")]
+            return False
