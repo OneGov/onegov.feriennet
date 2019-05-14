@@ -10,7 +10,7 @@ class DonationForm(Form):
 
     amount = RadioField(
         label=_("My donation"),
-        choices=[],
+        choices=(),
         validators=[InputRequired()]
     )
 
@@ -18,6 +18,7 @@ class DonationForm(Form):
         amounts = self.request.app.org.meta.get(
             'donation_amounts', DEFAULT_DONATION_AMOUNTS)
 
-        strings = format_donation_amounts(amounts).split('\n')
+        readable = format_donation_amounts(amounts).split('\n')
+        parsable = (f'{a:.2f}' for a in amounts)
 
-        self.amount.choices = tuple(zip(amounts, strings))
+        self.amount.choices = tuple(zip(parsable, readable))

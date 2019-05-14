@@ -75,12 +75,20 @@
                                     </thead>
                                     <tbody>
                                         <tal:b repeat="item details.items">
-                                            <tr class="group" tal:condition="repeat.item.start or details.items[repeat.item.index - 1].group != item.group">
+                                            <tr class="group" tal:condition="repeat.item.start or details.items[repeat.item.index - 1].group != item.group and item.group != 'donation'">
                                                 <td colspan="4" tal:condition="not:item.family">${item.group}</td>
                                                 <td colspan="4" tal:condition="item.family" i18n:translate>Discounts / Surcharges</td>
                                             </tr>
                                             <tr class="${item.paid and 'paid' or 'unpaid'}" tal:define="groupid hash(str(item.group) + str(repeat.item.index))">
-                                                <td>${item.text}</td>
+                                                <td>
+                                                    <tal:b condition="item.group == 'donation'">
+                                                        <tal:b i18n:translate>Donation</tal:b>
+                                                        ❤
+                                                    </tal:b>
+                                                    <tal:b condition="item.group != 'donation'">
+                                                        ${item.text}
+                                                    </tal:b>
+                                                </td>
                                                 <td class="amount">${'{:.2f}'.format(item.amount)}</td>
                                                 <td class="payment-status" tal:condition="not item.paid">
                                                     <span i18n:translate class="show-for-sr">Unpaid</span>

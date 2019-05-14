@@ -2731,3 +2731,21 @@ $booking-left-margin: 2rem;
         content: '\f004';
     }
 }
+
+
+/*
+    SVG Icon
+*/
+.svg-icon {
+    display: inline-block;
+}
+
+.svg-icon-small {
+    height: 16px;
+    width: 16px;
+}
+
+.svg-icon-medium {
+    height: 32px;
+    width: 32px;
+}
